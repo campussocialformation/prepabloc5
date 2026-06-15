@@ -610,16 +610,10 @@ const QUESTIONS = [
   /* ─────── THÈME 2 : TRANSMISSIONS (Q6–10) ─────── */
   {
     theme: "📋 Transmissions",
-    type: "qcm",
-    texte: "Quels sont les trois types de transmissions principaux utilisés en établissement médico-social ?",
-    options: [
-      "Formelles, informelles, électroniques",
-      "Orales, écrites, ciblées",
-      "Médicales, sociales, administratives",
-      "Quotidiennes, hebdomadaires, mensuelles"
-    ],
-    bonne: 1,
-    cours: "Les <strong>transmissions orales</strong> (passation de poste, téléphone, échange informel) permettent une communication rapide. Les <strong>transmissions écrites</strong> (cahier de liaison, logiciel de suivi) assurent la traçabilité. Les <strong>transmissions ciblées</strong> (méthode DAR/SOAP) permettent de cibler une donnée précise, l'action réalisée et le résultat observé. En DEAES Bloc 5, vous serez évalué sur votre capacité à choisir l'outil adapté à la situation."
+    type: "vf",
+    texte: "Dans une transmission écrite, l'AES doit noter son avis personnel sur la situation de la personne accompagnée plutôt que de décrire ce qu'il a observé.",
+    bonne: false,
+    cours: "Il faut distinguer deux niveaux dans une transmission : le <strong>constat</strong> et l'<strong>analyse</strong>. Le <strong>constat</strong>, c'est ce que l'AES a directement observé, vu ou entendu — des faits objectifs et vérifiables (ex. : « Marie n'a pas terminé son repas et a pleuré à 18h »). L'<strong>analyse</strong>, c'est l'interprétation ou l'hypothèse que l'on formule à partir de ces faits (ex. : « Elle semble anxieuse depuis la visite familiale »). Dans une transmission professionnelle, on commence toujours par le <strong>constat</strong>, et si l'on propose une analyse, elle doit être clairement identifiée comme telle — jamais présentée comme une certitude. L'AES ne transmet pas son avis comme une vérité : il transmet des faits, puis peut formuler une hypothèse argumentée."
   },
   {
     theme: "📋 Transmissions",
@@ -772,16 +766,15 @@ const QUESTIONS = [
   /* ─────── THÈME 5 : PROTECTION DE L'ENFANCE (Q21–25) ─────── */
   {
     theme: "👶 Protection de l'enfance",
-    type: "qcm",
-    texte: "Qu'est-ce qu'une MECS ?",
-    options: [
-      "Un service de placement familial géré par l'État",
-      "Un établissement accueillant des enfants et adolescents nécessitant une mesure de protection",
-      "Un centre médical spécialisé pour enfants handicapés",
-      "Un service d'accompagnement éducatif en milieu scolaire"
+    type: "asso",
+    texte: "Associe chaque sigle à sa signification complète :",
+    paires: [
+      { gauche: "MECS", droite: "Maison d'Enfants à Caractère Social" },
+      { gauche: "AEMO", droite: "Action Éducative en Milieu Ouvert" },
+      { gauche: "AED", droite: "Aide Éducative à Domicile" },
+      { gauche: "CRIP", droite: "Cellule de Recueil des Informations Préoccupantes" }
     ],
-    bonne: 1,
-    cours: "La <strong>MECS</strong> (Maison d'Enfants à Caractère Social) est un établissement de la protection de l'enfance qui accueille des mineurs (et parfois des jeunes majeurs jusqu'à 21 ans) placés par décision judiciaire ou administrative. Elle vise à protéger les enfants dont la situation familiale présente des risques pour leur développement. L'équipe pluridisciplinaire (éducateurs, psychologue, AES, infirmiers…) met en œuvre un accompagnement global."
+    cours: "Ces quatre sigles sont incontournables en protection de l'enfance. La <strong>MECS</strong> (Maison d'Enfants à Caractère Social) héberge des mineurs placés. L'<strong>AEMO</strong> (Action Éducative en Milieu Ouvert) est une mesure judiciaire : un éducateur suit la famille à domicile sans retirer l'enfant. L'<strong>AED</strong> (Aide Éducative à Domicile) est son équivalent administratif, mis en place avec l'accord des parents. La <strong>CRIP</strong> (Cellule de Recueil des Informations Préoccupantes) est le service du Conseil Départemental qui centralise et évalue les signalements d'enfants en danger."
   },
   {
     theme: "👶 Protection de l'enfance",
@@ -827,14 +820,14 @@ const QUESTIONS = [
   {
     theme: "👩‍⚕️ Professionnels du secteur",
     type: "asso",
-    texte: "Associe chaque professionnel à sa mission principale :",
+    texte: "Associe chaque institution à son rôle dans le secteur médico-social :",
     paires: [
-      { gauche: "Éducateur spécialisé (ES)", droite: "Accompagner des personnes en difficulté sociale ou handicap via des activités éducatives" },
-      { gauche: "AES / AMP", droite: "Accompagner dans les actes essentiels de la vie quotidienne et maintenir l'autonomie" },
-      { gauche: "Moniteur-éducateur (ME)", droite: "Organiser des activités éducatives et de loisirs, soutenir les compétences sociales" },
-      { gauche: "Chef de service", droite: "Coordonner l'équipe, gérer les plannings et assurer le lien entre direction et terrain" }
+      { gauche: "L'ARS", droite: "Autorise, finance et contrôle les établissements sanitaires et médico-sociaux au nom de l'État" },
+      { gauche: "Le Conseil Départemental", droite: "Pilote l'action sociale : protection de l'enfance, personnes âgées, handicap (PCH, APA)" },
+      { gauche: "La MDPH", droite: "Évalue les besoins des personnes handicapées et attribue les droits et orientations" },
+      { gauche: "Le préfet", droite: "Représente l'État dans le département, notamment pour l'hébergement d'urgence" }
     ],
-    cours: "Chaque professionnel occupe un rôle précis. L'<strong>ES</strong> (bac+3) réalise des accompagnements complexes et coordonne les projets. Le <strong>ME</strong> (bac+2) anime des activités et encadre les groupes. L'<strong>AES/AMP</strong> (niveau 3) assure le soutien dans les actes quotidiens. Le <strong>chef de service</strong> encadre l'équipe et est l'interlocuteur hiérarchique direct. L'AES doit connaître ces distinctions pour s'inscrire dans la <strong>bonne place</strong> au sein de l'équipe."
+    cours: "Dans le secteur médico-social, deux acteurs institutionnels sont centraux. L'<strong>ARS</strong> (Agence Régionale de Santé) représente l'État au niveau régional : elle autorise la création des établissements, les finance via la dotation globale et les contrôle. Elle est compétente pour les structures sanitaires et une partie du médico-social (MAS, FAM, SSIAD…). Le <strong>Conseil Départemental</strong> est la collectivité territoriale compétente pour l'action sociale : il pilote la protection de l'enfance (ASE), le soutien aux personnes âgées (APA), le handicap (PCH), et finance de nombreux établissements comme les CHRS ou les MECS. La <strong>MDPH</strong> (Maison Départementale des Personnes Handicapées) évalue les situations et ouvre les droits (orientation en établissement, AEEH, PCH…). Connaître ces acteurs permet à l'AES de comprendre qui finance et contrôle sa structure."
   },
   {
     theme: "👩‍⚕️ Professionnels du secteur",
