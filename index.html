@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Révision Bloc 5 AES – IRTS</title>
+<!-- jsPDF : seule dépendance externe autorisée -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  /* ===================== RESET & BASE ===================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bleu-nuit:   #1a3a5c;
+    --bleu-moyen:  #2e6da4;
+    --bleu-clair:  #e8f1f9;
+    --vert-sage:   #3a7d6a;
+    --vert-clair:  #e6f4f0;
+    --or:          #c9a227;
+    --or-clair:    #fdf3d0;
+    --rouge:       #c0392b;
+    --rouge-clair: #fdecea;
+    --gris-texte:  #2d3748;
+    --gris-doux:   #718096;
+    --fond:        #f4f7fb;
+    --blanc:       #ffffff;
+    --radius:      12px;
+    --ombre:       0 4px 20px rgba(0,0,0,.08);
+    --trans:       .25s ease;
+  }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--fond);
+    color: var(--gris-texte);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ===================== LAYOUT COQUILLE ===================== */
+  #app {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .card {
+    background: var(--blanc);
+    border-radius: var(--radius);
+    box-shadow: var(--ombre);
+    padding: 36px 40px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 600px) {
+    .card { padding: 24px 18px; }
+  }
+
+  /* ===================== ACCUEIL ===================== */
+  #ecran-accueil { text-align: center; }
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .logo-icon {
+    width: 60px; height: 60px;
+    background: var(--bleu-nuit);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .logo-texte { text-align: left; }
+  .logo-texte h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--bleu-nuit);
+    line-height: 1.2;
+  }
+  .logo-texte span {
+    font-size: .8rem;
+    color: var(--gris-doux);
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .accueil-bandeau {
+    background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--bleu-moyen) 100%);
+    border-radius: 10px;
+    color: var(--blanc);
+    padding: 28px 24px;
+    margin-bottom: 28px;
+  }
+  .accueil-bandeau h2 { font-size: 1.35rem; margin-bottom: 8px; }
+  .accueil-bandeau p  { font-size: .95rem; opacity: .88; }
+  .chips-themes {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .chip {
+    background: var(--bleu-clair);
+    color: var(--bleu-moyen);
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: .8rem;
+    font-weight: 600;
+  }
+  .form-groupe {
+    display: flex;
+    gap: 10px;
+    max-width: 420px;
+    margin: 0 auto 10px;
+  }
+  .form-groupe input {
+    flex: 1;
+    padding: 13px 16px;
+    border: 2px solid #d1dce8;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color var(--trans);
+    font-family: inherit;
+  }
+  .form-groupe input:focus { border-color: var(--bleu-moyen); }
+  .form-groupe input.erreur { border-color: var(--rouge); }
+  .msg-erreur { color: var(--rouge); font-size: .85rem; margin-bottom: 6px; min-height: 20px; }
+
+  /* ===================== BOUTONS ===================== */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 26px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform var(--trans), box-shadow var(--trans), background var(--trans);
+    font-family: inherit;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary {
+    background: var(--bleu-moyen);
+    color: var(--blanc);
+    box-shadow: 0 4px 14px rgba(46,109,164,.35);
+  }
+  .btn-primary:hover { background: var(--bleu-nuit); box-shadow: 0 6px 18px rgba(46,109,164,.45); }
+  .btn-vert {
+    background: var(--vert-sage);
+    color: var(--blanc);
+    box-shadow: 0 4px 14px rgba(58,125,106,.3);
+  }
+  .btn-vert:hover { background: #2e6356; }
+  .btn-or {
+    background: var(--or);
+    color: var(--blanc);
+    box-shadow: 0 4px 14px rgba(201,162,39,.4);
+  }
+  .btn-or:hover { background: #b08920; }
+  .btn-contour {
+    background: transparent;
+    color: var(--bleu-moyen);
+    border: 2px solid var(--bleu-moyen);
+  }
+  .btn-contour:hover { background: var(--bleu-clair); }
+  .btn-lg { padding: 16px 32px; font-size: 1.05rem; border-radius: 10px; }
+  .btn-full { width: 100%; }
+
+  /* ===================== BARRE DE PROGRESSION ===================== */
+  #barre-top {
+    background: var(--blanc);
+    border-radius: var(--radius);
+    box-shadow: var(--ombre);
+    padding: 14px 20px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .prog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--bleu-nuit);
+  }
+  .prog-meta .score-pill {
+    background: var(--bleu-clair);
+    color: var(--bleu-moyen);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: .8rem;
+  }
+  .prog-track {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--bleu-moyen), var(--vert-sage));
+    border-radius: 10px;
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .theme-badge {
+    margin-top: 8px;
+    font-size: .78rem;
+    color: var(--gris-doux);
+    font-weight: 500;
+  }
+
+  /* ===================== QUESTION ===================== */
+  #ecran-question { display: none; }
+  .question-num {
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--bleu-moyen);
+    margin-bottom: 10px;
+  }
+  .question-texte {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--bleu-nuit);
+    margin-bottom: 22px;
+    line-height: 1.45;
+  }
+  .type-label {
+    display: inline-block;
+    background: var(--bleu-clair);
+    color: var(--bleu-moyen);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+
+  /* Options QCM */
+  .options-liste { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid #d1dce8;
+    border-radius: 10px;
+    background: var(--blanc);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: .95rem;
+    color: var(--gris-texte);
+    transition: border-color var(--trans), background var(--trans), transform .1s;
+    width: 100%;
+    line-height: 1.5;
+  }
+  .option-btn:not(.repondu):hover {
+    border-color: var(--bleu-moyen);
+    background: var(--bleu-clair);
+    transform: translateX(3px);
+  }
+  .option-btn.repondu { cursor: default; }
+  .option-btn.correcte {
+    border-color: var(--vert-sage);
+    background: var(--vert-clair);
+    color: var(--vert-sage);
+    animation: popCorrect .3s ease;
+  }
+  .option-btn.incorrecte {
+    border-color: var(--rouge);
+    background: var(--rouge-clair);
+    color: var(--rouge);
+    animation: shake .35s ease;
+  }
+  .option-btn.neutre-repondu {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+    color: #a0aec0;
+  }
+  .option-lettre {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; min-width: 28px;
+    border-radius: 6px;
+    background: #e2e8f0;
+    font-weight: 800;
+    font-size: .8rem;
+    color: var(--bleu-nuit);
+  }
+  .correcte .option-lettre { background: var(--vert-sage); color: var(--blanc); }
+  .incorrecte .option-lettre { background: var(--rouge); color: var(--blanc); }
+
+  /* Vrai/Faux */
+  .vf-grille { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .vf-btn {
+    padding: 20px 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    border: 2px solid #d1dce8;
+    border-radius: 10px;
+    background: var(--blanc);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--trans);
+    color: var(--gris-texte);
+    text-align: center;
+  }
+  .vf-btn:not(.repondu):hover { transform: scale(1.03); border-color: var(--bleu-moyen); background: var(--bleu-clair); }
+  .vf-btn.correcte  { border-color: var(--vert-sage); background: var(--vert-clair); color: var(--vert-sage); }
+  .vf-btn.incorrecte { border-color: var(--rouge); background: var(--rouge-clair); color: var(--rouge); }
+  .vf-btn.neutre-repondu { border-color: #cbd5e0; background: #f7fafc; color: #a0aec0; }
+
+  /* Association */
+  .asso-container { display: flex; gap: 18px; flex-wrap: wrap; }
+  .asso-col { flex: 1; min-width: 140px; }
+  .asso-col h4 { font-size: .8rem; font-weight: 700; color: var(--gris-doux); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+  .asso-item {
+    padding: 11px 13px;
+    border: 2px solid #d1dce8;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: var(--blanc);
+    font-size: .9rem;
+    cursor: pointer;
+    transition: all var(--trans);
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+  }
+  .asso-item.selectionne { border-color: var(--bleu-moyen); background: var(--bleu-clair); font-weight: 600; }
+  .asso-item.apparie-ok { border-color: var(--vert-sage); background: var(--vert-clair); color: var(--vert-sage); font-weight: 600; }
+  .asso-item.apparie-ko { border-color: var(--rouge); background: var(--rouge-clair); color: var(--rouge); }
+  .asso-item.desactive  { cursor: default; opacity: .55; }
+  .asso-aide { font-size: .82rem; color: var(--gris-doux); margin-bottom: 12px; font-style: italic; }
+
+  /* ===================== RÉSUMÉ DE COURS ===================== */
+  .cours-encadre {
+    display: none;
+    margin-top: 20px;
+    border-left: 4px solid var(--bleu-moyen);
+    background: var(--bleu-clair);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 18px;
+    animation: slideDown .35s ease;
+  }
+  .cours-encadre.visible { display: block; }
+  .cours-encadre .cours-titre {
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: var(--bleu-moyen);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .cours-encadre .cours-body { font-size: .9rem; color: var(--bleu-nuit); line-height: 1.65; }
+  .cours-encadre .cours-body strong { color: var(--bleu-moyen); }
+
+  /* ===================== BOUTON SUIVANT ===================== */
+  #btn-suivant {
+    display: none;
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  /* ===================== FIN ===================== */
+  #ecran-fin { display: none; text-align: center; }
+  .fin-hero {
+    background: linear-gradient(135deg, var(--bleu-nuit), var(--vert-sage));
+    border-radius: 14px;
+    color: var(--blanc);
+    padding: 36px 28px;
+    margin-bottom: 22px;
+  }
+  .fin-hero .trophee { font-size: 4rem; margin-bottom: 12px; }
+  .fin-hero h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .fin-hero p  { font-size: 1rem; opacity: .9; }
+  .score-ring-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    background: var(--bleu-clair);
+    border-radius: 12px;
+    padding: 20px 16px;
+    margin-bottom: 20px;
+  }
+  .score-ring {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    border: 7px solid var(--bleu-moyen);
+    background: var(--blanc);
+  }
+  .score-ring .score-chiffre { font-size: 1.7rem; font-weight: 900; color: var(--bleu-nuit); line-height: 1; }
+  .score-ring .score-sous { font-size: .75rem; color: var(--gris-doux); font-weight: 600; }
+  .score-details { text-align: left; }
+  .score-stat { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: .9rem; }
+  .score-stat .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .dot-ok  { background: var(--vert-sage); }
+  .dot-ko  { background: var(--rouge); }
+  .dot-tot { background: var(--bleu-moyen); }
+  .btn-groupe { display: flex; flex-direction: column; gap: 12px; }
+
+  /* ===================== BADGE ===================== */
+  #badge-wrap { display: none; margin-top: 20px; }
+  #badge-canvas {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 6px 30px rgba(0,0,0,.15);
+  }
+  #badge-dl-btn { margin-top: 12px; display: none; }
+
+  /* ===================== MESSAGE BIENVENUE ===================== */
+  #bienvenue { display: none; background: var(--vert-clair); border: 2px solid var(--vert-sage); border-radius: 10px; padding: 14px 18px; margin-bottom: 18px; font-size: .95rem; color: var(--vert-sage); font-weight: 600; text-align: center; }
+
+  /* ===================== ANIMATIONS ===================== */
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes popCorrect {
+    0%  { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100%{ transform: scale(1); }
+  }
+  @keyframes shake {
+    0%,100%{ transform: translateX(0); }
+    20%    { transform: translateX(-6px); }
+    40%    { transform: translateX(6px); }
+    60%    { transform: translateX(-4px); }
+    80%    { transform: translateX(4px); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  .fade-in { animation: fadeIn .4s ease; }
+
+  /* ===================== FOOTER ===================== */
+  footer { text-align: center; font-size: .78rem; color: var(--gris-doux); padding: 20px 0 30px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════ ÉCRAN ACCUEIL ═══════════════ -->
+  <div id="ecran-accueil" class="card">
+    <div class="logo-wrap">
+      <div class="logo-icon">📚</div>
+      <div class="logo-texte">
+        <h1>Bloc 5 AES</h1>
+        <span>IRTS – Site de révision interactif</span>
+      </div>
+    </div>
+    <div class="accueil-bandeau">
+      <h2>Prépare ton épreuve écrite du Bloc 5 🎯</h2>
+      <p>Travail en équipe pluri-professionnelle, gestion des risques et traitement des informations liées à l'accompagnement de la personne.</p>
+    </div>
+    <div class="chips-themes">
+      <span class="chip">🤝 Travail d'équipe</span>
+      <span class="chip">📋 Transmissions</span>
+      <span class="chip">♿ Secteur Handicap</span>
+      <span class="chip">🏠 Exclusion sociale</span>
+      <span class="chip">👶 Protection enfance</span>
+      <span class="chip">👩‍⚕️ Professionnels</span>
+    </div>
+    <div id="bienvenue"></div>
+    <p style="font-size:.9rem;color:var(--gris-doux);margin-bottom:14px;">Entre ton prénom pour commencer :</p>
+    <div class="form-groupe">
+      <input type="text" id="prenom-input" placeholder="Ton prénom…" maxlength="40" autocomplete="given-name">
+      <button class="btn btn-primary" onclick="demarrer()">Commencer →</button>
+    </div>
+    <p class="msg-erreur" id="msg-erreur"></p>
+    <p style="font-size:.82rem;color:var(--gris-doux);margin-top:16px;">30 questions • Auto-correction immédiate • Cours intégrés • Badge & PDF à la fin</p>
+  </div>
+
+  <!-- ═══════════════ BARRE DE PROGRESSION ═══════════════ -->
+  <div id="barre-top">
+    <div class="prog-meta">
+      <span id="prog-label">Question 1 / 30</span>
+      <span class="score-pill" id="prog-score">✓ 0 correctes</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="theme-badge" id="theme-courant"></div>
+  </div>
+
+  <!-- ═══════════════ ÉCRAN QUESTION ═══════════════ -->
+  <div id="ecran-question" class="card">
+    <div class="question-num" id="q-num"></div>
+    <span class="type-label" id="q-type-label"></span>
+    <div class="question-texte" id="q-texte"></div>
+    <div id="q-zone"></div>
+    <div class="cours-encadre" id="cours-encadre">
+      <div class="cours-titre">📖 Résumé de cours</div>
+      <div class="cours-body" id="cours-body"></div>
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-suivant" onclick="questionSuivante()">Question suivante →</button>
+  </div>
+
+  <!-- ═══════════════ ÉCRAN FIN ═══════════════ -->
+  <div id="ecran-fin" class="card">
+    <div class="fin-hero">
+      <div class="trophee">🏆</div>
+      <h2 id="fin-titre"></h2>
+      <p id="fin-sous-titre"></p>
+    </div>
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <span class="score-chiffre" id="fin-pct">—</span>
+        <span class="score-sous">de réussite</span>
+      </div>
+      <div class="score-details">
+        <div class="score-stat"><div class="dot dot-ok"></div><span id="fin-ok">— correctes</span></div>
+        <div class="score-stat"><div class="dot dot-ko"></div><span id="fin-ko">— incorrectes</span></div>
+        <div class="score-stat"><div class="dot dot-tot"></div><span id="fin-tot">30 questions</span></div>
+      </div>
+    </div>
+    <div class="btn-groupe">
+      <button class="btn btn-or btn-lg" onclick="obtenirBadge()">🎖️ Obtenir mon badge</button>
+      <button class="btn btn-vert btn-lg" onclick="telechargerPDF()">📄 Télécharger le cours complet en PDF</button>
+      <button class="btn btn-contour" onclick="recommencer()">🔄 Recommencer</button>
+    </div>
+    <div id="badge-wrap">
+      <canvas id="badge-canvas" width="480" height="300"></canvas>
+      <button class="btn btn-or btn-full" id="badge-dl-btn" onclick="telechargerBadge()">⬇️ Télécharger le badge</button>
+    </div>
+  </div>
+
+  <footer>IRTS Paris — Formation AES — Révision Bloc 5 © 2026</footer>
+</div>
+
+<script>
+/* =====================================================================
+   DONNÉES — 30 QUESTIONS réparties en 6 thèmes
+   Types : "qcm" | "vf" | "asso"
+   ===================================================================== */
+
+const QUESTIONS = [
+
+  /* ─────── THÈME 1 : TRAVAIL D'ÉQUIPE (Q1–5) ─────── */
+  {
+    theme: "🤝 Travail d'équipe",
+    type: "qcm",
+    texte: "Qu'est-ce que la pluridisciplinarité en établissement médico-social ?",
+    options: [
+      "Un seul professionnel qui assure toutes les missions de l'accompagnement",
+      "La collaboration de plusieurs professionnels de disciplines différentes autour d'une même personne accompagnée",
+      "Des réunions hebdomadaires obligatoires entre tous les services de l'IRTS",
+      "Un outil numérique de suivi des usagers"
+    ],
+    bonne: 1,
+    cours: "La <strong>pluridisciplinarité</strong> désigne la mobilisation de professionnels issus de différentes disciplines (éducateur spécialisé, infirmier, psychologue, AES…) qui travaillent de façon coordonnée autour d'une même personne. Chaque professionnel apporte son expertise tout en restant dans son champ de compétences. L'AES doit connaître le rôle de chaque intervenant pour s'inscrire en <strong>complémentarité</strong>, sans empiéter sur les attributions des autres."
+  },
+  {
+    theme: "🤝 Travail d'équipe",
+    type: "vf",
+    texte: "La réunion de synthèse réunit tous les professionnels intervenant auprès d'un usager pour faire le point sur son projet personnalisé.",
+    bonne: true,
+    cours: "La <strong>réunion de synthèse</strong> est un temps collectif et pluridisciplinaire consacré à un usager précis. Elle permet de partager les observations de chaque professionnel, d'évaluer les objectifs du <strong>projet personnalisé</strong> et d'ajuster les actions d'accompagnement. L'AES y participe en apportant ses observations quotidiennes, en lien direct avec le vécu de la personne."
+  },
+  {
+    theme: "🤝 Travail d'équipe",
+    type: "qcm",
+    texte: "Parmi les documents institutionnels suivants, lequel définit la mission globale d'un établissement médico-social ?",
+    options: [
+      "Le cahier de transmissions",
+      "Le projet d'établissement",
+      "La grille AGGIR",
+      "La fiche de poste de l'AES"
+    ],
+    bonne: 1,
+    cours: "Le <strong>projet d'établissement</strong> est le document de référence qui précise les valeurs, les missions, les modalités d'accompagnement et les orientations stratégiques d'une structure sur 5 ans (art. L.311-8 CASF). Il sert de cadre à l'ensemble des actions de l'équipe. Parmi les autres documents institutionnels utiles au travail d'équipe : le livret d'accueil, le règlement de fonctionnement, la charte des droits et libertés, le contrat de séjour."
+  },
+  {
+    theme: "🤝 Travail d'équipe",
+    type: "vf",
+    texte: "La bienveillance dans les relations professionnelles signifie ne jamais exprimer de désaccord avec ses collègues.",
+    bonne: false,
+    cours: "La <strong>bienveillance professionnelle</strong> ne signifie pas l'absence de désaccord ou de contradiction. Elle désigne une posture de respect, d'écoute et de considération envers ses collègues. Il est tout à fait possible d'exprimer un point de vue différent de façon constructive et respectueuse, notamment lors des réunions d'équipe. La bienveillance est une compétence évaluée au Bloc 5 du DEAES."
+  },
+  {
+    theme: "🤝 Travail d'équipe",
+    type: "qcm",
+    texte: "Quelle est la responsabilité de l'AES lorsqu'il reçoit une information de l'équipe concernant un usager ?",
+    options: [
+      "La garder pour lui et agir de façon autonome sans en informer les autres",
+      "La transmettre immédiatement à la famille sans en référer à l'équipe",
+      "La prendre en compte dans son action et la réintégrer dans les transmissions",
+      "La noter dans son journal personnel"
+    ],
+    bonne: 2,
+    cours: "L'AES doit <strong>prendre en compte les informations transmises par l'équipe</strong> et en tenir compte dans son accompagnement quotidien. Il doit également retransmettre ces informations lorsqu'elles sont pertinentes. C'est le principe de la <strong>continuité de l'accompagnement</strong> : chaque professionnel reçoit, traite et transmet pour assurer une cohérence d'action autour de l'usager."
+  },
+
+  /* ─────── THÈME 2 : TRANSMISSIONS (Q6–10) ─────── */
+  {
+    theme: "📋 Transmissions",
+    type: "qcm",
+    texte: "Quels sont les trois types de transmissions principaux utilisés en établissement médico-social ?",
+    options: [
+      "Formelles, informelles, électroniques",
+      "Orales, écrites, ciblées",
+      "Médicales, sociales, administratives",
+      "Quotidiennes, hebdomadaires, mensuelles"
+    ],
+    bonne: 1,
+    cours: "Les <strong>transmissions orales</strong> (passation de poste, téléphone, échange informel) permettent une communication rapide. Les <strong>transmissions écrites</strong> (cahier de liaison, logiciel de suivi) assurent la traçabilité. Les <strong>transmissions ciblées</strong> (méthode DAR/SOAP) permettent de cibler une donnée précise, l'action réalisée et le résultat observé. En DEAES Bloc 5, vous serez évalué sur votre capacité à choisir l'outil adapté à la situation."
+  },
+  {
+    theme: "📋 Transmissions",
+    type: "vf",
+    texte: "Une transmission écrite doit contenir des jugements de valeur sur le comportement de l'usager pour être efficace.",
+    bonne: false,
+    cours: "Une bonne transmission écrite repose sur des <strong>faits observables et objectifs</strong>, non sur des interprétations ou jugements. Le professionnel décrit ce qu'il a vu, entendu ou constaté, sans interprétation personnelle. Par exemple, on n'écrira pas « Marc est de mauvaise humeur » mais « Marc a refusé le repas et s'est isolé dans sa chambre à 12h30 ». Cela garantit la <strong>fiabilité</strong> et le <strong>respect de la personne</strong>."
+  },
+  {
+    theme: "📋 Transmissions",
+    type: "asso",
+    texte: "Associe chaque outil à sa fonction principale :",
+    paires: [
+      { gauche: "Cahier de liaison", droite: "Assurer la continuité entre les équipes de jour et de nuit" },
+      { gauche: "Logiciel de suivi (ex. Netsoins)", droite: "Tracer et partager les informations de façon numérique et sécurisée" },
+      { gauche: "Compte rendu de réunion", droite: "Formaliser les décisions prises collectivement en équipe" },
+      { gauche: "Fiche de signalement", droite: "Déclarer un événement indésirable à la hiérarchie" }
+    ],
+    cours: "Les outils de transmission ont chacun leur objectif spécifique. Le <strong>cahier de liaison</strong> assure la passation entre les équipes. Les <strong>logiciels</strong> (Netsoins, Titan…) permettent une traçabilité numérique et sécurisée. Le <strong>compte rendu de réunion</strong> formalise les décisions et les plans d'action. La <strong>fiche de signalement d'événement indésirable</strong> est à remettre au cadre en cas d'incident (chute, fugue, accident…). L'AES doit maîtriser l'usage de chacun de ces outils."
+  },
+  {
+    theme: "📋 Transmissions",
+    type: "qcm",
+    texte: "Quelle règle s'applique à toute transmission d'informations concernant un usager ?",
+    options: [
+      "Les informations peuvent être partagées librement avec tous les professionnels du secteur",
+      "Les informations doivent respecter la confidentialité et la protection de la personne",
+      "Seul le médecin est habilité à transmettre des informations",
+      "Les transmissions sont réservées aux professionnels de santé"
+    ],
+    bonne: 1,
+    cours: "Toute transmission doit respecter le <strong>secret professionnel</strong> (art. 226-13 du Code pénal) et le <strong>secret partagé</strong> (Loi 2002-2). Seules les personnes directement impliquées dans l'accompagnement peuvent recevoir des informations. La transmission doit être <strong>pertinente, hiérarchisée et fiable</strong>. L'AES ne peut partager des informations avec des tiers (famille, partenaires) qu'avec l'accord de l'usager et dans les limites fixées par sa structure."
+  },
+  {
+    theme: "📋 Transmissions",
+    type: "vf",
+    texte: "Les échanges informels (discussions de couloir) font partie des outils de transmission reconnus en travail d'équipe.",
+    bonne: true,
+    cours: "Les <strong>échanges informels</strong> — discussions lors de la passation, appels téléphoniques, échanges en salle de pause — constituent bien une forme de transmission reconnue. Ils permettent la circulation rapide d'informations et renforcent la cohésion d'équipe. Cependant, ils doivent être complétés par des transmissions formelles et écrites pour assurer la <strong>traçabilité</strong> et la <strong>continuité de l'accompagnement</strong>."
+  },
+
+  /* ─────── THÈME 3 : SECTEUR DU HANDICAP (Q11–15) ─────── */
+  {
+    theme: "♿ Secteur du handicap",
+    type: "qcm",
+    texte: "L'ESAT accueille principalement quel public ?",
+    options: [
+      "Des enfants en situation de handicap mental de 0 à 6 ans",
+      "Des adultes en situation de handicap pour lesquels le travail en milieu ordinaire n'est pas (encore) possible",
+      "Des personnes âgées dépendantes ayant un handicap physique",
+      "Des adolescents présentant des troubles du comportement"
+    ],
+    bonne: 1,
+    cours: "L'<strong>ESAT</strong> (Établissement et Service d'Aide par le Travail) accueille des adultes (à partir de 20 ans) dont le handicap ne permet pas temporairement ou définitivement de travailler en milieu ordinaire. Il leur propose une activité professionnelle adaptée ainsi qu'un soutien médico-social. Les travailleurs y sont rémunérés. L'ESAT relève du <strong>secteur du travail protégé</strong>, distinct du secteur médico-social classique."
+  },
+  {
+    theme: "♿ Secteur du handicap",
+    type: "asso",
+    texte: "Associe chaque établissement à son public ou sa mission principale :",
+    paires: [
+      { gauche: "MAS", droite: "Adultes avec handicap très lourd nécessitant une aide permanente" },
+      { gauche: "IME", droite: "Enfants et adolescents avec déficience intellectuelle" },
+      { gauche: "SESSAD", droite: "Accompagnement en milieu ordinaire (école, domicile)" },
+      { gauche: "ULIS", droite: "Dispositif d'inclusion scolaire en établissement ordinaire" }
+    ],
+    cours: "La <strong>MAS</strong> (Maison d'Accueil Spécialisée) accompagne des adultes lourdement handicapés nécessitant des soins constants. L'<strong>IME</strong> (Institut Médico-Éducatif) accueille des jeunes de 0 à 20 ans avec déficience intellectuelle. Le <strong>SESSAD</strong> (Service d'Éducation Spéciale et de Soins à Domicile) intervient dans le milieu de vie naturel de l'enfant. Les <strong>ULIS</strong> (Unités Localisées d'Inclusion Scolaire) sont des dispositifs au sein des établissements scolaires ordinaires pour des élèves en situation de handicap."
+  },
+  {
+    theme: "♿ Secteur du handicap",
+    type: "vf",
+    texte: "La FAM (Foyer d'Accueil Médicalisé) est réservée aux adultes avec un handicap mental léger qui travaillent en milieu ordinaire.",
+    bonne: false,
+    cours: "La <strong>FAM</strong> (Foyer d'Accueil Médicalisé) accueille des adultes présentant un handicap intellectuel, physique ou psychique sévère, <strong>ne pouvant pas travailler même en milieu protégé</strong>. Elle assure à la fois un hébergement, une vie sociale et des soins médicaux. Elle se distingue de la MAS par un niveau de dépendance légèrement inférieur et se situe entre le foyer de vie et la MAS dans la gradation des réponses au handicap lourd."
+  },
+  {
+    theme: "♿ Secteur du handicap",
+    type: "qcm",
+    texte: "Quelle est la mission principale d'un ITEP ?",
+    options: [
+      "Accueillir des adultes souffrant de maladies psychiatriques chroniques",
+      "Accompagner des enfants et adolescents présentant des troubles du comportement sans déficience intellectuelle",
+      "Proposer une formation professionnelle aux adultes handicapés physiques",
+      "Héberger des personnes âgées atteintes de troubles cognitifs"
+    ],
+    bonne: 1,
+    cours: "L'<strong>ITEP</strong> (Institut Thérapeutique, Éducatif et Pédagogique) accompagne des enfants, adolescents et jeunes adultes présentant des <strong>troubles du comportement et de la conduite</strong> (troubles psychologiques, relationnels) sans déficience intellectuelle associée. L'approche est pluridisciplinaire : soins thérapeutiques, accompagnement éducatif et scolarité. Depuis 2017, ils fonctionnent souvent en « DITEP » (dispositif ITEP) pour une modalité d'accompagnement plus flexible."
+  },
+  {
+    theme: "♿ Secteur du handicap",
+    type: "vf",
+    texte: "L'AES travaille exclusivement dans les établissements du secteur du handicap.",
+    bonne: false,
+    cours: "L'AES (Accompagnant Éducatif et Social) peut exercer dans de <strong>très nombreux secteurs</strong> : handicap, personnes âgées, protection de l'enfance, exclusion sociale, inclusion scolaire (AESH). La formation DEAES couvre une spécialisation (vie en établissement, domicile, ou scolaire), mais les compétences du Bloc 5 — travail d'équipe, transmissions, gestion des risques — sont communes à tous les contextes d'exercice."
+  },
+
+  /* ─────── THÈME 4 : EXCLUSION SOCIALE (Q16–20) ─────── */
+  {
+    theme: "🏠 Exclusion sociale",
+    type: "qcm",
+    texte: "Quel est l'objectif principal d'un CHRS ?",
+    options: [
+      "Héberger à long terme des personnes en situation de grande précarité",
+      "Assurer un hébergement temporaire et un accompagnement vers l'insertion sociale et professionnelle",
+      "Proposer une prise en charge médicale intensive aux personnes sans domicile",
+      "Accueillir exclusivement des familles avec enfants"
+    ],
+    bonne: 1,
+    cours: "Le <strong>CHRS</strong> (Centre d'Hébergement et de Réinsertion Sociale) propose un accueil temporaire (en général 6 à 12 mois, renouvelable) à des personnes en situation de grande précarité (violence conjugale, sortie de prison, rupture familiale…). Son objectif est l'<strong>insertion sociale et professionnelle</strong> : accompagnement administratif, accès aux droits, soutien à la recherche d'emploi et de logement. Il est financé par l'État."
+  },
+  {
+    theme: "🏠 Exclusion sociale",
+    type: "asso",
+    texte: "Associe chaque structure à sa description :",
+    paires: [
+      { gauche: "SAMU social", droite: "Maraudes et aide d'urgence aux personnes à la rue" },
+      { gauche: "CADA", droite: "Hébergement et accompagnement des demandeurs d'asile" },
+      { gauche: "Accueil de jour", droite: "Lieu ouvert sans hébergement pour se reposer, se laver, se restaurer" },
+      { gauche: "115", droite: "Numéro d'urgence sociale pour l'hébergement d'urgence" }
+    ],
+    cours: "Le <strong>SAMU social</strong> effectue des maraudes pour aller à la rencontre des personnes sans abri. Le <strong>CADA</strong> (Centre d'Accueil pour Demandeurs d'Asile) héberge et accompagne les personnes en attente de décision de l'OFPRA. L'<strong>accueil de jour</strong> offre des services de base (douche, repas, domiciliation) sans hébergement. Le <strong>115</strong> est le numéro national d'urgence sociale, à composer pour une demande d'hébergement d'urgence."
+  },
+  {
+    theme: "🏠 Exclusion sociale",
+    type: "vf",
+    texte: "L'AES peut travailler dans une structure d'hébergement d'urgence pour personnes sans domicile.",
+    bonne: true,
+    cours: "L'AES intervient dans des structures de l'exclusion sociale : CHRS, hébergement d'urgence, accueils de jour… Il y assure un accompagnement dans les actes de la vie quotidienne, contribue aux transmissions et au travail d'équipe pluridisciplinaire. Dans ces contextes, la <strong>posture éthique</strong> et le respect de la <strong>dignité de la personne</strong> sont particulièrement importants, face à des publics souvent en grande fragilité psychologique et sociale."
+  },
+  {
+    theme: "🏠 Exclusion sociale",
+    type: "qcm",
+    texte: "Dans un CHRS, quel professionnel est généralement responsable de la coordination du projet d'insertion de l'usager ?",
+    options: [
+      "L'AES uniquement",
+      "Le médecin coordinateur",
+      "L'assistant de service social ou le travailleur social référent",
+      "Le bénévole en charge de l'accueil"
+    ],
+    bonne: 2,
+    cours: "Dans un CHRS, c'est généralement l'<strong>assistant de service social</strong> ou le <strong>travailleur social référent</strong> (éducateur spécialisé, CESF) qui coordonne le projet d'insertion de l'usager. L'AES intervient en appui, notamment sur l'accompagnement quotidien et les actes de la vie courante. Le travail en équipe repose sur la <strong>complémentarité des rôles</strong> : chacun agit dans son champ de compétences, en lien avec les autres intervenants."
+  },
+  {
+    theme: "🏠 Exclusion sociale",
+    type: "vf",
+    texte: "La domiciliation est un droit permettant aux personnes sans adresse fixe de recevoir du courrier et d'accéder à certains droits sociaux.",
+    bonne: true,
+    cours: "La <strong>domiciliation administrative</strong> (Loi DALO, 2007) permet à toute personne sans domicile stable d'élire une adresse officielle auprès d'un CCAS ou d'une association agréée. C'est une condition d'accès à de nombreux droits : ouverture d'un compte bancaire, RSA, couverture maladie universelle (PUMA), inscription sur les listes électorales. L'AES peut orienter les usagers vers ce service ou faciliter les démarches."
+  },
+
+  /* ─────── THÈME 5 : PROTECTION DE L'ENFANCE (Q21–25) ─────── */
+  {
+    theme: "👶 Protection de l'enfance",
+    type: "qcm",
+    texte: "Qu'est-ce qu'une MECS ?",
+    options: [
+      "Un service de placement familial géré par l'État",
+      "Un établissement accueillant des enfants et adolescents nécessitant une mesure de protection",
+      "Un centre médical spécialisé pour enfants handicapés",
+      "Un service d'accompagnement éducatif en milieu scolaire"
+    ],
+    bonne: 1,
+    cours: "La <strong>MECS</strong> (Maison d'Enfants à Caractère Social) est un établissement de la protection de l'enfance qui accueille des mineurs (et parfois des jeunes majeurs jusqu'à 21 ans) placés par décision judiciaire ou administrative. Elle vise à protéger les enfants dont la situation familiale présente des risques pour leur développement. L'équipe pluridisciplinaire (éducateurs, psychologue, AES, infirmiers…) met en œuvre un accompagnement global."
+  },
+  {
+    theme: "👶 Protection de l'enfance",
+    type: "asso",
+    texte: "Associe chaque dispositif de protection de l'enfance à sa définition :",
+    paires: [
+      { gauche: "Foyer de l'enfance", droite: "Accueil d'urgence de courte durée pour enfants en danger" },
+      { gauche: "Famille d'accueil", droite: "Accueil d'un enfant placé à son domicile par un assistant familial agréé" },
+      { gauche: "AEMO", droite: "Mesure éducative maintenant l'enfant dans sa famille avec suivi intensif" },
+      { gauche: "ITEP", droite: "Accompagnement d'enfants avec troubles du comportement sans déficience intellectuelle" }
+    ],
+    cours: "Le <strong>foyer de l'enfance</strong> assure un accueil d'urgence, 24h/24, pour des enfants retirés de leur milieu familial. L'<strong>assistant familial</strong> (famille d'accueil agréée) accueille l'enfant à son domicile. L'<strong>AEMO</strong> (Action Éducative en Milieu Ouvert) est une mesure ordonnée par le juge : un éducateur intervient régulièrement au domicile familial pour soutenir les parents et l'enfant. Ces dispositifs sont coordonnés par les <strong>Conseils Départementaux</strong> (ASE)."
+  },
+  {
+    theme: "👶 Protection de l'enfance",
+    type: "vf",
+    texte: "L'AES en MECS peut décider seul d'une levée de placement sans en référer à l'équipe ou au chef de service.",
+    bonne: false,
+    cours: "La levée d'une mesure de placement relève d'une <strong>décision judiciaire ou administrative</strong>, jamais d'un professionnel seul. L'AES doit obligatoirement en référer à son <strong>chef de service</strong> et à l'équipe. Toute décision concernant la situation de l'enfant est prise de façon collégiale, en respectant le cadre légal et le <strong>projet pour l'enfant</strong> (PPE). Agir de façon isolée constituerait une faute professionnelle grave."
+  },
+  {
+    theme: "👶 Protection de l'enfance",
+    type: "qcm",
+    texte: "L'Aide Sociale à l'Enfance (ASE) est organisée par :",
+    options: [
+      "L'État via les DRJSCS",
+      "Le Conseil Départemental",
+      "Les associations agréées uniquement",
+      "L'Éducation Nationale"
+    ],
+    bonne: 1,
+    cours: "L'<strong>ASE</strong> (Aide Sociale à l'Enfance) est un service du <strong>Conseil Départemental</strong>, compétent depuis les lois de décentralisation de 1983-1986. Elle est chargée de prévenir les difficultés familiales, de protéger les mineurs en danger et d'accompagner les jeunes majeurs en difficultés. Elle peut mandater des MECS, des familles d'accueil ou des services AEMO pour mettre en œuvre les mesures de protection."
+  },
+  {
+    theme: "👶 Protection de l'enfance",
+    type: "vf",
+    texte: "Le projet pour l'enfant (PPE) est un document élaboré avec l'enfant et sa famille.",
+    bonne: true,
+    cours: "Le <strong>PPE</strong> (Projet Pour l'Enfant), institué par la loi du 5 mars 2007, est un document personnalisé qui définit les objectifs de la prise en charge d'un mineur confié à l'ASE. Il est élaboré avec <strong>l'enfant, ses parents et les professionnels</strong> référents. Il couvre les domaines éducatifs, de santé, scolaires et relationnels. Sa révision régulière permet d'adapter l'accompagnement à l'évolution de la situation de l'enfant."
+  },
+
+  /* ─────── THÈME 6 : PROFESSIONNELS (Q26–30) ─────── */
+  {
+    theme: "👩‍⚕️ Professionnels du secteur",
+    type: "asso",
+    texte: "Associe chaque professionnel à sa mission principale :",
+    paires: [
+      { gauche: "Éducateur spécialisé (ES)", droite: "Accompagner des personnes en difficulté sociale ou handicap via des activités éducatives" },
+      { gauche: "AES / AMP", droite: "Accompagner dans les actes essentiels de la vie quotidienne et maintenir l'autonomie" },
+      { gauche: "Moniteur-éducateur (ME)", droite: "Organiser des activités éducatives et de loisirs, soutenir les compétences sociales" },
+      { gauche: "Chef de service", droite: "Coordonner l'équipe, gérer les plannings et assurer le lien entre direction et terrain" }
+    ],
+    cours: "Chaque professionnel occupe un rôle précis. L'<strong>ES</strong> (bac+3) réalise des accompagnements complexes et coordonne les projets. Le <strong>ME</strong> (bac+2) anime des activités et encadre les groupes. L'<strong>AES/AMP</strong> (niveau 3) assure le soutien dans les actes quotidiens. Le <strong>chef de service</strong> encadre l'équipe et est l'interlocuteur hiérarchique direct. L'AES doit connaître ces distinctions pour s'inscrire dans la <strong>bonne place</strong> au sein de l'équipe."
+  },
+  {
+    theme: "👩‍⚕️ Professionnels du secteur",
+    type: "qcm",
+    texte: "Quelle est la différence principale entre l'AES et l'éducateur spécialisé ?",
+    options: [
+      "L'AES peut prendre des décisions médicales, pas l'éducateur",
+      "L'éducateur spécialisé a un niveau de formation plus élevé (niveau 6 / bac+3) et mène des actions éducatives complexes",
+      "Il n'y a aucune différence, ils font exactement le même travail",
+      "L'AES est responsable du budget des établissements"
+    ],
+    bonne: 1,
+    cours: "L'<strong>éducateur spécialisé</strong> est formé au niveau 6 (anciennement bac+3) via le DEES. Il réalise des projets éducatifs complexes, coordonne des partenariats et accompagne des situations à haute complexité psychosociale. L'<strong>AES</strong> est formé au niveau 3 (CAP équivalent) via le DEAES. Il intervient principalement dans le <strong>soutien aux actes de la vie quotidienne</strong> et le maintien de l'autonomie. Leurs compétences sont <strong>complémentaires</strong>, non substituables."
+  },
+  {
+    theme: "👩‍⚕️ Professionnels du secteur",
+    type: "vf",
+    texte: "Le psychologue en établissement médico-social fait partie de l'équipe pluridisciplinaire et peut transmettre des informations à l'équipe éducative.",
+    bonne: true,
+    cours: "Le <strong>psychologue</strong> est soumis au secret professionnel spécifique, mais peut partager des informations avec l'équipe dans le cadre du <strong>secret partagé</strong> (Loi 2002-2) lorsqu'elles sont nécessaires à la continuité de l'accompagnement. Il apporte son regard clinique lors des réunions de synthèse. Il ne transmet pas le contenu des entretiens thérapeutiques, mais peut indiquer des préconisations utiles à l'équipe éducative pour mieux accompagner l'usager."
+  },
+  {
+    theme: "👩‍⚕️ Professionnels du secteur",
+    type: "qcm",
+    texte: "Lorsqu'un AES observe un comportement inhabituel chez un usager, quelle doit être sa première démarche ?",
+    options: [
+      "Appeler directement la famille sans en parler à l'équipe",
+      "Observer, noter les faits précis et les transmettre à l'équipe lors de la passation ou par écrit",
+      "Ignorer la situation car ce n'est pas dans ses attributions",
+      "Prendre lui-même des décisions médicales pour l'usager"
+    ],
+    bonne: 1,
+    cours: "Face à un comportement inhabituel, l'AES doit d'abord <strong>observer et noter précisément</strong> ce qu'il constate (heure, comportement, contexte) puis <strong>transmettre cette information</strong> à l'équipe lors de la passation ou via les écrits professionnels. Cette démarche respecte le principe de <strong>continuité de l'accompagnement</strong> et de <strong>travail en équipe</strong>. L'AES n'agit pas seul : il alerte, informe et propose, sans sortir de son champ de compétences."
+  },
+  {
+    theme: "👩‍⚕️ Professionnels du secteur",
+    type: "vf",
+    texte: "L'assistant de service social (ASS) peut accompagner les usagers dans leurs démarches administratives et les orienter vers des dispositifs d'aide.",
+    bonne: true,
+    cours: "L'<strong>assistant de service social</strong> (ASS, niveau 6 / DEASS) accompagne les personnes dans l'accès à leurs droits, les démarches administratives (CAF, MDPH, Pôle emploi…), la recherche de logement et l'insertion sociale. Il travaille en lien étroit avec l'AES, notamment pour coordonner les informations relatives à la situation globale de l'usager. La <strong>complémentarité AES / ASS</strong> est un exemple concret du travail pluridisciplinaire évalué au Bloc 5."
+  }
+
+];
+
+/* =====================================================================
+   ÉTAT GLOBAL DE L'APPLICATION
+   ===================================================================== */
+let prenom       = "";
+let indexQ       = 0;
+let score        = 0;
+let aRepondu     = false;
+// Association state
+let assoGauche   = null;  // index sélectionné côté gauche
+let assoPaires   = [];    // paires résolues
+
+/* =====================================================================
+   UTILITAIRES
+   ===================================================================== */
+const $  = id => document.getElementById(id);
+const q  = ()  => QUESTIONS[indexQ];
+
+function melangerTableau(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* =====================================================================
+   DÉMARRAGE
+   ===================================================================== */
+function demarrer() {
+  const val = $("prenom-input").value.trim();
+  $("msg-erreur").textContent = "";
+  $("prenom-input").classList.remove("erreur");
+  if (!val) {
+    $("msg-erreur").textContent = "Merci d'entrer ton prénom pour continuer.";
+    $("prenom-input").classList.add("erreur");
+    $("prenom-input").focus();
+    return;
+  }
+  prenom = val;
+  $("bienvenue").textContent = `Bienvenue ${prenom} ! Bonne révision 🌟`;
+  $("bienvenue").style.display = "block";
+
+  setTimeout(() => {
+    $("ecran-accueil").style.display = "none";
+    $("barre-top").style.display = "block";
+    $("ecran-question").style.display = "block";
+    afficherQuestion();
+  }, 900);
+}
+
+$("prenom-input").addEventListener("keydown", e => { if (e.key === "Enter") demarrer(); });
+
+/* =====================================================================
+   AFFICHAGE D'UNE QUESTION
+   ===================================================================== */
+function afficherQuestion() {
+  aRepondu   = false;
+  assoGauche = null;
+  assoPaires = [];
+
+  const question = q();
+  $("cours-encadre").classList.remove("visible");
+  $("btn-suivant").style.display = "none";
+  $("ecran-question").classList.add("fade-in");
+
+  // Barre de progression
+  const pct = Math.round((indexQ / QUESTIONS.length) * 100);
+  $("prog-fill").style.width = pct + "%";
+  $("prog-label").textContent = `Question ${indexQ + 1} / ${QUESTIONS.length}`;
+  $("prog-score").textContent = `✓ ${score} correcte${score > 1 ? "s" : ""}`;
+  $("theme-courant").textContent = question.theme;
+
+  // Numéro et intitulé
+  $("q-num").textContent = `Question ${indexQ + 1} — ${question.theme}`;
+  $("q-texte").textContent = question.texte;
+
+  const typeMap = { qcm: "QCM", vf: "Vrai / Faux", asso: "Association" };
+  $("q-type-label").textContent = typeMap[question.type] || question.type;
+
+  // Zone de réponse
+  const zone = $("q-zone");
+  zone.innerHTML = "";
+
+  if (question.type === "qcm")  renderQCM(zone, question);
+  if (question.type === "vf")   renderVF(zone, question);
+  if (question.type === "asso") renderAsso(zone, question);
+}
+
+/* ─────── QCM ─────── */
+function renderQCM(zone, question) {
+  const liste = document.createElement("div");
+  liste.className = "options-liste";
+  const lettres = ["A", "B", "C", "D"];
+  question.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.innerHTML = `<span class="option-lettre">${lettres[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => validerQCM(i, question, liste);
+    liste.appendChild(btn);
+  });
+  zone.appendChild(liste);
+}
+
+function validerQCM(choix, question, liste) {
+  if (aRepondu) return;
+  aRepondu = true;
+  const btns = liste.querySelectorAll(".option-btn");
+  btns.forEach((btn, i) => {
+    btn.classList.add("repondu");
+    if (i === question.bonne) btn.classList.add("correcte");
+    else if (i === choix)     btn.classList.add("incorrecte");
+    else                      btn.classList.add("neutre-repondu");
+    btn.querySelector(".option-lettre").style.transition = "background .3s, color .3s";
+  });
+  if (choix === question.bonne) score++;
+  afficherCours(question.cours);
+}
+
+/* ─────── VRAI / FAUX ─────── */
+function renderVF(zone, question) {
+  const grille = document.createElement("div");
+  grille.className = "vf-grille";
+  [["✅ Vrai", true], ["❌ Faux", false]].forEach(([label, val]) => {
+    const btn = document.createElement("button");
+    btn.className = "vf-btn";
+    btn.textContent = label;
+    btn.onclick = () => validerVF(val, question, grille);
+    grille.appendChild(btn);
+  });
+  zone.appendChild(grille);
+}
+
+function validerVF(choix, question, grille) {
+  if (aRepondu) return;
+  aRepondu = true;
+  const btns = grille.querySelectorAll(".vf-btn");
+  btns.forEach(btn => {
+    btn.classList.add("repondu");
+    const estVrai = btn.textContent.includes("Vrai");
+    if (estVrai === question.bonne) btn.classList.add("correcte");
+    else if (estVrai === choix)     btn.classList.add("incorrecte");
+    else                            btn.classList.add("neutre-repondu");
+  });
+  if (choix === question.bonne) score++;
+  afficherCours(question.cours);
+}
+
+/* ─────── ASSOCIATION ─────── */
+function renderAsso(zone, question) {
+  // Mélanger les droites pour le défi
+  const droitesMelangees = melangerTableau(question.paires.map((p, i) => ({ texte: p.droite, idx: i })));
+
+  const aide = document.createElement("p");
+  aide.className = "asso-aide";
+  aide.textContent = "Clique sur un élément de gauche puis sur l'élément de droite correspondant.";
+  zone.appendChild(aide);
+
+  const container = document.createElement("div");
+  container.className = "asso-container";
+
+  // Colonne gauche
+  const colG = document.createElement("div");
+  colG.className = "asso-col";
+  colG.innerHTML = "<h4>Terme</h4>";
+  question.paires.forEach((paire, i) => {
+    const btn = document.createElement("button");
+    btn.className = "asso-item";
+    btn.textContent = paire.gauche;
+    btn.dataset.idx = i;
+    btn.onclick = () => selectionnerGauche(i, btn, question, colG, colD, droitesMelangees, question.paires.length);
+    colG.appendChild(btn);
+  });
+
+  // Colonne droite
+  const colD = document.createElement("div");
+  colD.className = "asso-col";
+  colD.innerHTML = "<h4>Définition</h4>";
+  droitesMelangees.forEach((d) => {
+    const btn = document.createElement("button");
+    btn.className = "asso-item";
+    btn.textContent = d.texte;
+    btn.dataset.idx = d.idx;
+    btn.onclick = () => selectionnerDroite(d.idx, btn, question, colG, colD, droitesMelangees, question.paires.length);
+    colD.appendChild(btn);
+  });
+
+  container.appendChild(colG);
+  container.appendChild(colD);
+  zone.appendChild(container);
+}
+
+function selectionnerGauche(idx, btn, question, colG, colD, droitesMelangees, total) {
+  if (aRepondu) return;
+  // Désélectionner l'ancienne sélection côté gauche
+  colG.querySelectorAll(".asso-item:not(.apparie-ok):not(.apparie-ko)").forEach(b => b.classList.remove("selectionne"));
+  if (assoPaires.find(p => p.gauche === idx)) return; // déjà apparié
+  assoGauche = idx;
+  btn.classList.add("selectionne");
+}
+
+function selectionnerDroite(idx, btn, question, colG, colD, droitesMelangees, total) {
+  if (aRepondu || assoGauche === null) return;
+  if (assoPaires.find(p => p.droite === idx)) return; // déjà apparié
+
+  const g = assoGauche;
+  const correct = (g === idx); // idx correspond à l'index original dans la paire
+
+  // Marquer côté gauche
+  const btnG = colG.querySelectorAll(".asso-item")[g];
+  btnG.classList.remove("selectionne");
+  btnG.classList.add(correct ? "apparie-ok" : "apparie-ko");
+  btnG.classList.add("desactive");
+
+  // Marquer côté droit
+  btn.classList.add(correct ? "apparie-ok" : "apparie-ko");
+  btn.classList.add("desactive");
+
+  assoPaires.push({ gauche: g, droite: idx, correct });
+  assoGauche = null;
+  if (correct) score += 1 / total; // score partiel par association
+
+  // Si toutes les paires sont faites
+  if (assoPaires.length === total) {
+    aRepondu = true;
+    // Normaliser le score : si toutes correctes, on a ajouté 1 total au score (1 point plein)
+    // Déjà gérés en fraction — arrondi à l'entier à la fin
+    // Révéler les bonnes réponses pour celles mal appariées
+    colD.querySelectorAll(".asso-item").forEach(b => {
+      if (!b.classList.contains("apparie-ok")) {
+        b.classList.remove("apparie-ko");
+        // Find correct match
+        const dIdx = parseInt(b.dataset.idx);
+        const gCorrect = question.paires[dIdx].gauche;
+        // On laisse la correction visuelle déjà faite
+      }
+    });
+    afficherCours(question.cours);
+  }
+}
+
+/* ─────── COURS & SUIVANT ─────── */
+function afficherCours(texte) {
+  $("cours-body").innerHTML = texte;
+  $("cours-encadre").classList.add("visible");
+  $("btn-suivant").style.display = "block";
+  $("cours-encadre").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function questionSuivante() {
+  indexQ++;
+  if (indexQ >= QUESTIONS.length) {
+    afficherFin();
+  } else {
+    $("ecran-question").classList.remove("fade-in");
+    void $("ecran-question").offsetWidth; // reflow
+    afficherQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+/* =====================================================================
+   ÉCRAN DE FIN
+   ===================================================================== */
+function afficherFin() {
+  $("barre-top").style.display = "none";
+  $("ecran-question").style.display = "none";
+  $("ecran-fin").style.display = "block";
+
+  const scoreEntier = Math.round(score);
+  const total = QUESTIONS.length;
+  const pct = Math.round((scoreEntier / total) * 100);
+
+  $("fin-titre").textContent = pct >= 70
+    ? `Bravo ${prenom} ! 🎉`
+    : `Continue ${prenom}, tu y es presque !`;
+  $("fin-sous-titre").textContent = pct >= 70
+    ? "Tu as bien maîtrisé les contenus du Bloc 5 DEAES !"
+    : "Relis les résumés de cours pour consolider tes connaissances.";
+
+  $("fin-pct").textContent = pct + "%";
+  $("fin-ok").textContent  = `${scoreEntier} correcte${scoreEntier > 1 ? "s" : ""}`;
+  $("fin-ko").textContent  = `${total - scoreEntier} incorrecte${(total - scoreEntier) > 1 ? "s" : ""}`;
+  $("fin-tot").textContent = `${total} questions au total`;
+
+  // Mettre à jour l'anneau de score
+  const ring = document.querySelector(".score-ring");
+  ring.style.borderColor = pct >= 70 ? "var(--vert-sage)" : "var(--or)";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* =====================================================================
+   BADGE
+   ===================================================================== */
+function obtenirBadge() {
+  const wrap = $("badge-wrap");
+  wrap.style.display = "block";
+  const canvas = $("badge-canvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+
+  // Fond dégradé
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, "#1a3a5c");
+  grad.addColorStop(1, "#2e6da4");
+  ctx.fillStyle = grad;
+  roundRect(ctx, 0, 0, W, H, 18);
+  ctx.fill();
+
+  // Bordure dorée
+  ctx.strokeStyle = "#c9a227";
+  ctx.lineWidth = 8;
+  roundRect(ctx, 6, 6, W - 12, H - 12, 14);
+  ctx.stroke();
+
+  // Bordure intérieure
+  ctx.strokeStyle = "rgba(201,162,39,0.4)";
+  ctx.lineWidth = 2;
+  roundRect(ctx, 18, 18, W - 36, H - 36, 10);
+  ctx.stroke();
+
+  // Étoile décorative
+  ctx.font = "bold 42px serif";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#c9a227";
+  ctx.fillText("★", W / 2, 72);
+
+  // Titre
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 22px 'Segoe UI', sans-serif";
+  ctx.fillText("RÉVISION BLOC 5 AES", W / 2, 110);
+
+  // Sous-titre
+  ctx.font = "15px 'Segoe UI', sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.fillText("Travail en équipe pluri-professionnelle", W / 2, 135);
+  ctx.fillText("Gestion des risques · Transmissions", W / 2, 155);
+
+  // Séparateur
+  ctx.strokeStyle = "rgba(201,162,39,0.6)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(60, 170); ctx.lineTo(W - 60, 170);
+  ctx.stroke();
+
+  // Prénom
+  ctx.fillStyle = "#c9a227";
+  ctx.font = "bold 28px 'Segoe UI', sans-serif";
+  ctx.fillText(prenom, W / 2, 208);
+
+  // Texte certif
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.font = "13px 'Segoe UI', sans-serif";
+  ctx.fillText("a complété la révision avec succès", W / 2, 232);
+
+  // Date et score
+  const maintenant = new Date();
+  const dateStr = maintenant.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+  const scoreEntier = Math.round(score);
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  ctx.font = "12px 'Segoe UI', sans-serif";
+  ctx.fillText(`Le ${dateStr}  •  Score : ${scoreEntier}/${QUESTIONS.length}`, W / 2, 262);
+
+  // IRTS
+  ctx.fillStyle = "rgba(201,162,39,0.8)";
+  ctx.font = "bold 11px 'Segoe UI', sans-serif";
+  ctx.fillText("IRTS Paris — Formation DEAES", W / 2, 285);
+
+  $("badge-dl-btn").style.display = "block";
+  wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function telechargerBadge() {
+  const canvas = $("badge-canvas");
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = `badge_bloc5_aes_${prenom}.png`;
+  a.click();
+}
+
+/* =====================================================================
+   PDF DU COURS COMPLET
+   ===================================================================== */
+function telechargerPDF() {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) { alert("Erreur : la bibliothèque jsPDF n'est pas chargée. Vérifiez votre connexion Internet."); return; }
+
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const largeur = 210;
+  const margeG = 18, margeD = 18;
+  const largeurTexte = largeur - margeG - margeD;
+  let y = 20;
+
+  // Helpers
+  function nouvellePage() {
+    doc.addPage();
+    y = 20;
+  }
+  function verifY(besoin) {
+    if (y + besoin > 280) nouvellePage();
+  }
+  function addTexteMultiligne(texte, x, largeur, taille, style = "normal") {
+    doc.setFontSize(taille);
+    doc.setFont("helvetica", style);
+    // Nettoyer les balises HTML simples
+    const propre = texte.replace(/<strong>/g,"").replace(/<\/strong>/g,"").replace(/<[^>]+>/g,"");
+    const lignes = doc.splitTextToSize(propre, largeur);
+    lignes.forEach(ligne => {
+      verifY(taille * 0.4 + 2);
+      doc.text(ligne, x, y);
+      y += taille * 0.4 + 1.5;
+    });
+  }
+
+  // PAGE DE COUVERTURE
+  doc.setFillColor(26, 58, 92);
+  doc.rect(0, 0, 210, 297, "F");
+  doc.setTextColor(201, 162, 39);
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.text("COURS COMPLET — BLOC 5 AES", 105, 100, { align: "center" });
+  doc.setFontSize(14);
+  doc.setTextColor(255, 255, 255);
+  doc.text("Travail en équipe pluri-professionnelle", 105, 118, { align: "center" });
+  doc.text("Gestion des risques · Traitement des informations", 105, 128, { align: "center" });
+  doc.setFontSize(12);
+  doc.setTextColor(201, 162, 39);
+  doc.text(`Révisé par : ${prenom}`, 105, 155, { align: "center" });
+  const dateStr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+  doc.setTextColor(200, 200, 200);
+  doc.setFontSize(10);
+  doc.text(`IRTS Paris — DEAES — ${dateStr}`, 105, 168, { align: "center" });
+
+  // REGROUPER PAR THÈME
+  const themes = {};
+  QUESTIONS.forEach(q => {
+    if (!themes[q.theme]) themes[q.theme] = [];
+    themes[q.theme].push(q);
+  });
+
+  let premierTheme = true;
+
+  Object.entries(themes).forEach(([theme, questions]) => {
+    // Nouvelle page par thème
+    doc.addPage();
+    y = 20;
+
+    // En-tête du thème
+    doc.setFillColor(26, 58, 92);
+    doc.rect(0, 0, 210, 35, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    // Nettoyer l'émoji du thème
+    const themeNet = theme.replace(/[^\x00-\x7F]/g, "").trim();
+    doc.text(themeNet || theme, 105, 22, { align: "center" });
+    y = 45;
+    doc.setTextColor(0, 0, 0);
+
+    questions.forEach((question, qi) => {
+      verifY(30);
+
+      // Numéro + question
+      doc.setFillColor(232, 241, 249);
+      doc.rect(margeG, y - 5, largeurTexte, 10, "F");
+      doc.setTextColor(26, 58, 92);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      const typeLabel = { qcm: "QCM", vf: "Vrai / Faux", asso: "Association" }[question.type] || question.type;
+      doc.text(`[${typeLabel}] ${question.texte}`, margeG + 2, y + 1, { maxWidth: largeurTexte - 4 });
+      y += 12;
+
+      // Réponse correcte
+      doc.setTextColor(58, 125, 106);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      if (question.type === "qcm") {
+        verifY(8);
+        doc.text(`✓ Bonne réponse : ${question.options[question.bonne]}`, margeG + 3, y, { maxWidth: largeurTexte - 6 });
+        y += 7;
+      } else if (question.type === "vf") {
+        verifY(6);
+        doc.text(`✓ Bonne réponse : ${question.bonne ? "VRAI" : "FAUX"}`, margeG + 3, y);
+        y += 7;
+      } else if (question.type === "asso") {
+        question.paires.forEach(paire => {
+          verifY(6);
+          const txt = `✓ ${paire.gauche} → ${paire.droite}`;
+          const lns = doc.splitTextToSize(txt, largeurTexte - 6);
+          lns.forEach(l => { doc.text(l, margeG + 3, y); y += 5; });
+        });
+        y += 2;
+      }
+
+      // Cours
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(9.5);
+      doc.setFont("helvetica", "normal");
+      verifY(6);
+      doc.setTextColor(46, 109, 164);
+      doc.text("📖 Résumé de cours :", margeG, y);
+      y += 5;
+      doc.setTextColor(45, 55, 72);
+      const coursNet = question.cours.replace(/<strong>/g,"").replace(/<\/strong>/g,"").replace(/<[^>]+>/g,"");
+      const lns = doc.splitTextToSize(coursNet, largeurTexte);
+      lns.forEach(l => { verifY(5); doc.text(l, margeG + 2, y); y += 4.5; });
+
+      y += 6;
+
+      // Séparateur
+      if (qi < questions.length - 1) {
+        verifY(4);
+        doc.setDrawColor(210, 220, 235);
+        doc.line(margeG, y, 210 - margeD, y);
+        y += 5;
+      }
+    });
+  });
+
+  // Page finale
+  doc.addPage();
+  doc.setFillColor(58, 125, 106);
+  doc.rect(0, 0, 210, 297, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont("helvetica", "bold");
+  doc.text("Bonne chance pour ton épreuve !", 105, 130, { align: "center" });
+  doc.setFontSize(13);
+  doc.text(`${prenom}, tu es prêt(e) pour le Bloc 5 DEAES ✓`, 105, 150, { align: "center" });
+  doc.setFontSize(10);
+  doc.setTextColor(200, 255, 230);
+  doc.text("IRTS Paris — Formation DEAES — Bloc 5", 105, 175, { align: "center" });
+
+  doc.save(`cours_complet_bloc5_aes_${prenom}.pdf`);
+}
+
+/* =====================================================================
+   RECOMMENCER
+   ===================================================================== */
+function recommencer() {
+  indexQ = 0;
+  score  = 0;
+  $("ecran-fin").style.display = "none";
+  $("badge-wrap").style.display = "none";
+  $("badge-dl-btn").style.display = "none";
+  $("barre-top").style.display = "block";
+  $("ecran-question").style.display = "block";
+  afficherQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+</script>
+</body>
+</html>
